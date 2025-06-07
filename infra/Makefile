@@ -1,3 +1,5 @@
+MAKEFLAGS += --no-print-directory
+
 BINARY_NAME=myapp
 # DSN="host=localhost port=5432 user=postgres password=password dbname=concurrency sslmode=disable timezone=UTC connect_timeout=5"
 DSN="user=postgres password=password host=localhost port=5432 dbname=concurrency sslmode=disable"
@@ -33,7 +35,9 @@ start: run
 
 stop: stop-compose
 	@echo "Stopping..."
-	@-pkill -SIGTERM -f "${BINARY_NAME}"
+	# @-pkill -SIGTERM -f "${BINARY_NAME}" 2>/dev/null || true
+	@-pkill "${BINARY_NAME}" 2>/dev/null || true
+	@echo "Stoped!"
 
 restart: stop start
 
