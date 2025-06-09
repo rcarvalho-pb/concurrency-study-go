@@ -10,6 +10,7 @@ import (
 func (app *Config) routes() http.Handler {
 	mux := chi.NewRouter()
 	mux.Use(middleware.Recoverer)
+	mux.Use(app.SessionLoad)
 	mux.Get("/", app.HomePage)
 	return mux
 }

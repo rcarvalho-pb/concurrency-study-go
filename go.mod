@@ -3,7 +3,6 @@ module github.com/rcarvalho-pb/concurrency-study
 go 1.24.2
 
 require (
-	github.com/alexedwards/scs v1.4.1
 	github.com/alexedwards/scs/redisstore v0.0.0-20250417082927-ab20b3feb5e9
 	github.com/alexedwards/scs/v2 v2.8.0
 	github.com/go-chi/chi/v5 v5.2.1
