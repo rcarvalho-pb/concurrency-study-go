@@ -1,0 +1,51 @@
+package main
+
+import "sync"
+
+type Mail struct {
+	Domain      string
+	Host        string
+	Port        int
+	Username    string
+	Password    string
+	Encryption  string
+	FromAddress string
+	FromName    string
+	Wait        *sync.WaitGroup
+	MailerChan  chan Message
+	ErrorChan   chan error
+	DoneChan    chan bool
+}
+
+type Message struct {
+	From        string
+	FromName    string
+	To          string
+	Subject     string
+	Attachments []string
+	Data        any
+	DataMap     map[string]any
+	Template    string
+}
+
+func (m *Mail) SendMail(msg Message, errorChan chan error) {
+	if msg.Template == "" {
+		msg.Template = "mail"
+	}
+	if msg.From == "" {
+		msg.From = m.FromAddress
+	}
+	if msg.FromName == "" {
+		msg.FromName = m.FromName
+	}
+	data := map[string]any{
+		"message": msg.Data
+	}
+
+	msg.DataMap = data
+
+	formattedMessage, err := m.BuildHTMLMessage(msg)
+	if err != nil {
+
+	}
+}
