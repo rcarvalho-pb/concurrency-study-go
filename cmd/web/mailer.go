@@ -37,7 +37,21 @@ type Message struct {
 	Template    string
 }
 
+func (app *Config) ListenForMail() {
+	for {
+		select {
+		case msg := <-app.Mailer.MailerChan:
+			go app.Mailer.SendMail(msg, app.Mailer.ErrorChan)
+		case err := <-app.Mailer.ErrorChan:
+			app.ErrorLog.Println(err)
+		case <-app.Mailer.DoneChan:
+			return
+		}
+	}
+}
+
 func (m *Mail) SendMail(msg Message, errorChan chan error) {
+	defer m.Wait.Done()
 	if msg.Template == "" {
 		msg.Template = "mail"
 	}
@@ -109,7 +123,6 @@ func (m *Mail) BuildPlainTextMessage(msg Message) (string, error) {
 		return "", err
 	}
 	formattedMsg := tpl.String()
-	formattedMsg, err = m.inLineCSS(formattedMsg)
 	if err != nil {
 		return "", err
 	}

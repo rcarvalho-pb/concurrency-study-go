@@ -45,7 +45,8 @@ func main() {
 		Models:   data.New(db),
 	}
 	//set up mail
-
+	app.Mailer = app.CreateMail()
+	go app.ListenForMail()
 	//listen for signals
 	go app.listenForShutdown()
 	//listen for web connections
@@ -137,4 +138,23 @@ func (app *Config) shutdown() {
 	app.InfoLog.Println("would run cleanup tasks...")
 	app.Wait.Wait()
 	app.InfoLog.Println("closing channels and shutting down application...")
+}
+
+func (app *Config) CreateMail() Mail {
+	errorChan := make(chan error)
+	mailerChan := make(chan Message, 100)
+	mailerDoneChan := make(chan bool)
+	m := Mail{
+		Domain:      "localhost",
+		Host:        "localhost",
+		Port:        1025,
+		Encryption:  "none",
+		FromName:    "Info",
+		FromAddress: "info@mycompany.com",
+		Wait:        app.Wait,
+		ErrorChan:   errorChan,
+		MailerChan:  mailerChan,
+		DoneChan:    mailerDoneChan,
+	}
+	return m
 }
