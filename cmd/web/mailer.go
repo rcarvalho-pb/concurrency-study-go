@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"fmt"
 	"html/template"
 	"sync"
 	"time"
@@ -76,7 +77,7 @@ func (m *Mail) SendMail(msg Message, errorChan chan error) {
 	email := mail.NewMSG()
 	email.SetFrom(msg.From).AddTo(msg.To).SetSubject(msg.Subject).SetBody(mail.TextPlain, plainMessage).AddAlternative(mail.TextHTML, formattedMessage)
 	if len(msg.Attachments) > 0 {
-		for _, att := msg.Attachments {
+		for _, att := range msg.Attachments {
 			email.AddAttachment(att)
 		}
 	}
@@ -89,11 +90,11 @@ func (m *Mail) BuildHTMLMessage(msg Message) (string, error) {
 	templateToRender := fmt.Sprintf("../templates/%s.html.gohtml", msg.Template)
 	t, err := template.New("email-html").ParseFiles(templateToRender)
 	var tpl bytes.Buffer
-	if err := t.ExecuteTemplate(tpl, "body", msg.DataMap); err != nil {
+	if err := t.ExecuteTemplate(&tpl, "body", msg.DataMap); err != nil {
 		return "", err
 	}
 	formattedMsg := tpl.String()
-	formattedMsg, err := m.inLineCSS(formattedMsg)
+	formattedMsg, err = m.inLineCSS(formattedMsg)
 	if err != nil {
 		return "", err
 	}
@@ -104,11 +105,11 @@ func (m *Mail) BuildPlainTextMessage(msg Message) (string, error) {
 	templateToRender := fmt.Sprintf("../templates/%s.plain.gohtml", msg.Template)
 	t, err := template.New("email-plain").ParseFiles(templateToRender)
 	var tpl bytes.Buffer
-	if err := t.ExecuteTemplate(tpl, "body", msg.DataMap); err != nil {
+	if err := t.ExecuteTemplate(&tpl, "body", msg.DataMap); err != nil {
 		return "", err
 	}
 	formattedMsg := tpl.String()
-	formattedMsg, err := m.inLineCSS(formattedMsg)
+	formattedMsg, err = m.inLineCSS(formattedMsg)
 	if err != nil {
 		return "", err
 	}
@@ -117,8 +118,8 @@ func (m *Mail) BuildPlainTextMessage(msg Message) (string, error) {
 
 func (m *Mail) inLineCSS(s string) (string, error) {
 	options := premailer.Options{
-		RemoveClasses: false,
-		CssToAttributes: false,
+		RemoveClasses:     false,
+		CssToAttributes:   false,
 		KeepBangImportant: true,
 	}
 	prem, err := premailer.NewPremailerFromString(s, &options)
