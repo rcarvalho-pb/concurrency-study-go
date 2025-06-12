@@ -18,9 +18,9 @@ func (app *Config) PostLoginPage(w http.ResponseWriter, r *http.Request) {
 	}
 	email := r.Form.Get("email")
 	password := r.Form.Get("password")
-	app.InfoLog.Println(email, password)
 	user, err := app.Models.User.GetByEmail(email)
 	if err != nil {
+		app.InfoLog.Println("User not found")
 		app.Session.Put(r.Context(), "error", "invalid credentials")
 		http.Redirect(w, r, "/login", http.StatusSeeOther)
 		return

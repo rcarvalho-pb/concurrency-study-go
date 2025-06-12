@@ -137,7 +137,11 @@ func (app *Config) listenForShutdown() {
 func (app *Config) shutdown() {
 	app.InfoLog.Println("would run cleanup tasks...")
 	app.Wait.Wait()
+	app.Mailer.DoneChan <- true
 	app.InfoLog.Println("closing channels and shutting down application...")
+	close(app.Mailer.ErrorChan)
+	close(app.Mailer.MailerChan)
+	close(app.Mailer.DoneChan)
 }
 
 func (app *Config) CreateMail() Mail {
